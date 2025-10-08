@@ -9,6 +9,10 @@ jobs:
   hello_world_job:
     runs-on: ubuntu-latest
     steps:
-      - name: Say hello
+      - name: Say Hello
         run: |
           echo "hello world, chama"
+      - name: Current Date
+        run: date
+      - name: List Directory Contents
+        run: ls -a
