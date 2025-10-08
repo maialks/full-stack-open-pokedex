@@ -1,0 +1,8 @@
+A CI pipeline consists of several steps. The first is linting: it usually runs in the developer's IDE, and it can and should be part of the CI pipeline. The goal is to enforce a consistent coding style between all developers. In our example Java project we will be using SonarLint in the IDE and SonarQube in the pipeline for static analysis.
+
+After formatting and static analysis, we can run some tests. These tests can be unit, integration, or end-to-end, and some of them can be executed again later in the pipeline. For this project we will be using JUnit 5 for unit tests, SpringBootTest for integration tests, and Selenium for E2E ones. The E2E tests usually take longer and can be separated into their own stage on the pipeline.
+
+Next comes the building stage, where our code is compiled to bytecode (in this specific case of using Java), and a build artifact is created. In our project a common choice is using Maven. It's recommended to also run some tests after this stage.
+With a built artifact, we enter the packaging phase, making the software portable, reproducible, and deployment-ready. With Maven, this is part of the build cycle. Finally, we usually run some of the tests again on the packaged artifact.
+
+One last and important decision is where to run the pipeline. An option that supports both cloud-based and self-hosted runners is GitLab CI. For a six-person team, a cloud-based CI usually is a better option: it doesn't require too much boilerplate configuration, and especially for a simple app, we don't really need the flexibility and control that the self-hosted option provides at the cost of complex configurations.
