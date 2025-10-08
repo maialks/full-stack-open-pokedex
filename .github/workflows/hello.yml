@@ -10,9 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Say Hello
-        run: |
-          echo "hello world, chama"
+        run: echo "hello world, chama"
       - name: Current Date
         run: date
       - name: List Directory Contents
-        run: ls -a
+        run: ls -l
