@@ -1,0 +1,1 @@
+this should skip versioning and deploy, current version is 0.0.4 and it must not be changed

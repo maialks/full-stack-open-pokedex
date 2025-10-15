@@ -1,1 +1,0 @@
-did not realize that pushing coming from merge does not have commits array
