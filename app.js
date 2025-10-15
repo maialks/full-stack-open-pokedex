@@ -15,5 +15,5 @@ app.get('/health', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`server started on port ${PORT} chama v2`) // eslint-disable-line no-console
+  console.log(`server started on port ${PORT} chama`) // eslint-disable-line no-console
 })
