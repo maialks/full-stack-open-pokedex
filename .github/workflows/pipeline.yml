@@ -34,7 +34,7 @@ jobs:
     needs: [simple_deployment_pipeline]
     permissions:
       contents: write
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name && !(github.event && github.event.head_commit && github.event.head_commit.message && endsWith(github.event.head_commit.message, '#skip')) }}
     concurrency:
       group: deploy-group
     steps:
