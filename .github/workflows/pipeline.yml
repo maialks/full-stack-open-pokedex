@@ -67,7 +67,7 @@ jobs:
           DEFAULT_BUMP: patch
 
       # notificação sucesso
-      - name: Discord notification - Deploy Success
+      - name: discord notification - deploy success
         if: success()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -76,7 +76,7 @@ jobs:
           DISCORD_EMBEDS: >-
             [
               {
-                "title": "🚀 Deploy Successful",
+                "title": "Deploy Successful",
                 "description": "**Repository:** [${{ github.repository }}](https://github.com/${{ github.repository }})\n**Branch:** `${{ github.ref_name }}`\n**Commit:** [${{ github.event.head_commit.id }}](https://github.com/${{ github.repository }}/commit/${{ github.event.head_commit.id }})\n\nThe deployment to Fly.io has been successfully completed.",
                 "color": 3066993,
                 "footer": { "text": "GitHub Actions | Fly.io Deployment" },
@@ -85,11 +85,11 @@ jobs:
             ]
         uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554
         with:
-          args: 'Deploy bem sucedido for ${{ github.repository }}'
+          args: ''
 
   # notificação de falha
   notify_failure:
-    name: Notify Discord on Failure
+    name: discord notificaton - pipeline failure
     runs-on: ubuntu-latest
     if: failure()
     needs: [simple_deployment_pipeline, deploy]
@@ -97,12 +97,12 @@ jobs:
       - name: Send Discord Notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_USERNAME: 'GitHub CI Bot'
+          DISCORD_USERNAME: 'GitHub CI'
           DISCORD_AVATAR: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
           DISCORD_EMBEDS: >-
             [
               {
-                "title": "💥 Pipeline Failed",
+                "title": "Pipeline Failed",
                 "description": "**Repository:** [${{ github.repository }}](https://github.com/${{ github.repository }})\n**Branch:** `${{ github.ref_name }}`\n**Commit:** [${{ github.event.head_commit.id }}](https://github.com/${{ github.repository }}/commit/${{ github.event.head_commit.id }})\n\nA failure occurred in the CI/CD pipeline. Please check the logs for details.",
                 "color": 15158332,
                 "footer": { "text": "GitHub Actions | CI/CD Error" },
@@ -111,4 +111,4 @@ jobs:
             ]
         uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554
         with:
-          args: 'Pipeline falhou em ${{ github.repository }}, cheque os logs'
+          args: ''
