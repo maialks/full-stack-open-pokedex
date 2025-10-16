@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: '20'
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
       - name: Run ESLint
         run: npm run eslint
       - name: Run Build
@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: npm install
+      - run: npm ci
       - run: npm run build
       - name: Deploy to Fly.io
         run: flyctl deploy --remote-only
@@ -52,3 +52,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
+
+      - name: discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554
+        with:
+          args: 'O projeto {{ EVENT_PAYLOAD.repository.full_name }} foi deployado'
