@@ -1,0 +1,39 @@
+name: Periodic Health Check
+
+on:
+  schedule:
+    - cron: '15 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  scheduled_health_check:
+    name: pokeapi health-check
+    runs-on: ubuntu-latest
+    env:
+      API_URL: https://pokeapi.co/api/v2/type/ice/
+    steps:
+      - name: check pokeapi health
+        uses: jtalk/url-health-check-action@b716ccb6645355dd9fcce8002ce460e5474f7f00
+        with:
+          url: ${{ env.API_URL }}
+          max-attempts: 3
+          retry-delay: 5s
+
+      - name: Send Discord Notification
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_USERNAME: 'GitHub CI'
+          DISCORD_AVATAR: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
+          DISCORD_EMBEDS: >-
+            [
+              {
+                "title": "Healthcheck Failed",
+                "description": "**Repository:** [${{ github.repository }}](https://github.com/${{ github.repository }})\n\nA failure occurred in the API (${{env.API_URL}}). Please check the logs for details.",
+                "color": 15158332,
+                "footer": { "text": "GitHub Actions | Health Check Error" }
+              }
+            ]
+        uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554
+        with:
+          args: ''
