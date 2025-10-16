@@ -7,27 +7,36 @@ on:
     branches: [main]
     types: [opened, synchronize]
 
+# build e testes
 jobs:
   simple_deployment_pipeline:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Install Dependencies
         run: npm ci
+
       - name: Run ESLint
         run: npm run eslint
+
       - name: Run Build
         run: npm run build
+
       - name: Run Tests
         run: npm run test
+
       - name: Install Playwright w/ Deps
         run: npx playwright install --with-deps
+
       - name: Run Playwright E2E Tests
         run: npm run test:e2e
 
+  # deploy
   deploy:
     name: Deploy app
     runs-on: ubuntu-latest
@@ -37,11 +46,15 @@ jobs:
     if: ${{ github.event_name && !(github.event && github.event.head_commit && github.event.head_commit.message && endsWith(github.event.head_commit.message, '#skip')) }}
     concurrency:
       group: deploy-group
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
+
       - uses: superfly/flyctl-actions/setup-flyctl@master
+
       - run: npm ci
       - run: npm run build
+
       - name: Deploy to Fly.io
         run: flyctl deploy --remote-only
         env:
@@ -53,9 +66,49 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
 
-      - name: discord notification
+      # notificação sucesso
+      - name: Discord notification - Deploy Success
+        if: success()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_USERNAME: 'GitHub Deploy Bot'
+          DISCORD_AVATAR: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
+          DISCORD_EMBEDS: >-
+            [
+              {
+                "title": "🚀 Deploy Successful",
+                "description": "**Repository:** [${{ github.repository }}](https://github.com/${{ github.repository }})\n**Branch:** `${{ github.ref_name }}`\n**Commit:** [${{ github.event.head_commit.id }}](https://github.com/${{ github.repository }}/commit/${{ github.event.head_commit.id }})\n\nThe deployment to Fly.io has been successfully completed.",
+                "color": 3066993,
+                "footer": { "text": "GitHub Actions | Fly.io Deployment" },
+                "timestamp": "${{ github.event.head_commit.timestamp }}"
+              }
+            ]
         uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554
         with:
-          args: 'O projeto {{ EVENT_PAYLOAD.repository.full_name }} foi deployado'
+          args: 'Deploy bem sucedido for ${{ github.repository }}'
+
+  # notificação de falha
+  notify_failure:
+    name: Notify Discord on Failure
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [simple_deployment_pipeline, deploy]
+    steps:
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_USERNAME: 'GitHub CI Bot'
+          DISCORD_AVATAR: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
+          DISCORD_EMBEDS: >-
+            [
+              {
+                "title": "💥 Pipeline Failed",
+                "description": "**Repository:** [${{ github.repository }}](https://github.com/${{ github.repository }})\n**Branch:** `${{ github.ref_name }}`\n**Commit:** [${{ github.event.head_commit.id }}](https://github.com/${{ github.repository }}/commit/${{ github.event.head_commit.id }})\n\nA failure occurred in the CI/CD pipeline. Please check the logs for details.",
+                "color": 15158332,
+                "footer": { "text": "GitHub Actions | CI/CD Error" },
+                "timestamp": "${{ github.event.head_commit.timestamp }}"
+              }
+            ]
+        uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554
+        with:
+          args: 'Pipeline falhou em ${{ github.repository }}, cheque os logs'

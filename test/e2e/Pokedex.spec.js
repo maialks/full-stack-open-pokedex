@@ -14,7 +14,7 @@ describe('Pokedex', () => {
   })
 
   test('can navigate from main page to pokemon page', async ({ page }) => {
-    await page.getByRole('link', { name: 'charizard' }).click()
+    await page.getByRole('link', { name: 'pikachu' }).click()
     await expect(page.getByText('solar power')).toBeVisible()
   })
 })
